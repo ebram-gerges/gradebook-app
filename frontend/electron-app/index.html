@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="crud.js" defer></script>
+    <script src="renderer.js" defer></script>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-container glass-card">
+            <h1 class="login-title">Session Management</h1>
+            <p class="login-subtitle">Enter password to continue</p>
+            <input 
+                type="password" 
+                id="passwordInput" 
+                class="login-input" 
+                placeholder="Enter password"
+                autofocus
+            />
+            <button id="loginBtn" class="login-btn">Login</button>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="dashboard hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-header">
+                <h2 class="app-title">📚 Session Manager</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="groups">
+                    <span class="nav-icon">👥</span>
+                    <span>Groups</span>
+                </button>
+                <button class="nav-item" data-view="students">
+                    <span class="nav-icon">🎓</span>
+                    <span>Students</span>
+                </button>
+                <button class="nav-item" data-view="sessions">
+                    <span class="nav-icon">📅</span>
+                    <span>Sessions</span>
+                </button>
+                <button class="nav-item" data-view="gradebook">
+                    <span class="nav-icon">📊</span>
+                    <span>Gradebook</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Groups View -->
+            <div id="groupsView" class="content-view active">
+                <div class="view-header">
+                    <h2 class="view-title">Groups</h2>
+                    <div class="header-actions">
+                        <button class="btn-primary" id="addGroupBtn">+ Add Group</button>
+                        <button class="btn-secondary" id="refreshGroups">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div id="groupsList" class="data-grid">
+                        <div class="loading">Loading groups...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students View -->
+            <div id="studentsView" class="content-view">
+                <div class="view-header">
+                    <h2 class="view-title">Students</h2>
+                    <div class="header-actions">
+                        <button class="btn-primary" id="addStudentBtn">+ Add Student</button>
+                        <button class="btn-secondary" id="refreshStudents">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div id="studentsList" class="data-grid">
+                        <div class="loading">Loading students...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sessions View -->
+            <div id="sessionsView" class="content-view">
+                <div class="view-header">
+                    <h2 class="view-title">Sessions</h2>
+                    <div class="header-actions">
+                        <button class="btn-primary" id="addSessionBtn">+ Add Session</button>
+                        <button class="btn-secondary" id="refreshSessions">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- Homework Upload Form -->
+                    <div class="glass-card upload-form">
+                        <h3 class="form-title">Upload Homework Materials</h3>
+                        <form id="homeworkForm">
+                            <div class="form-group">
+                                <label for="homeworkTitle">Title</label>
+                                <input type="text" id="homeworkTitle" class="form-input" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="homeworkDescription">Description</label>
+                                <textarea id="homeworkDescription" class="form-input" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="homeworkFiles">Select Images</label>
+                                <input type="file" id="homeworkFiles" class="form-input" accept="image/*" multiple required />
+                            </div>
+                            <button type="submit" class="btn-primary">Upload Homework</button>
+                        </form>
+                        <div id="uploadStatus" class="status-message"></div>
+                    </div>
+
+                    <div id="sessionsList" class="data-grid">
+                        <div class="loading">Loading sessions...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gradebook View -->
+            <div id="gradebookView" class="content-view">
+                <div class="view-header">
+                    <h2 class="view-title">Gradebook</h2>
+                    <div class="header-actions">
+                        <button class="btn-primary" id="addGradebookBtn">+ Add Entry</button>
+                        <button class="btn-secondary" id="refreshGradebook">🔄 Refresh</button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div id="gradebookList" class="data-grid">
+                        <div class="loading">Loading gradebook...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Group Modal -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="groupModalTitle">Add Group</h3>
+                <button class="modal-close" onclick="closeModal('groupModal')">✕</button>
+            </div>
+            <form id="groupForm" class="modal-form">
+                <input type="hidden" id="groupId">
+                <div class="form-group">
+                    <label>Group Name</label>
+                    <input type="text" id="groupName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Day</label>
+                    <select id="groupDay" class="form-input" required>
+                        <option value="0">Sunday</option>
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" id="groupTime" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="groupStartDate" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Session Count</label>
+                    <input type="number" id="groupSessionCount" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="groupIsActive"> Active
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="groupIsCompleted"> Completed
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('groupModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="studentModalTitle">Add Student</h3>
+                <button class="modal-close" onclick="closeModal('studentModal')">✕</button>
+            </div>
+            <form id="studentForm" class="modal-form">
+                <input type="hidden" id="studentId">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="studentName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="studentAge" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Group</label>
+                    <select id="studentGroup" class="form-input" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Total Grade</label>
+                    <input type="number" id="studentTotalGrade" class="form-input" value="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('studentModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Session Modal -->
+    <div id="sessionModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="sessionModalTitle">Add Session</h3>
+                <button class="modal-close" onclick="closeModal('sessionModal')">✕</button>
+            </div>
+            <form id="sessionForm" class="modal-form">
+                <input type="hidden" id="sessionId">
+                <div class="form-group">
+                    <label>Group</label>
+                    <select id="sessionGroup" class="form-input" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Session Number</label>
+                    <input type="number" id="sessionNumber" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="sessionTitle" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="sessionDate" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Time</label>
+                    <input type="time" id="sessionTime" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="sessionStatus" class="form-input" required>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="done">Done</option>
+                        <option value="delayed">Delayed</option>
+                        <option value="canceled">Canceled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Homework Info</label>
+                    <textarea id="sessionHomework" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="sessionReviewed"> Reviewed
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('sessionModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Gradebook Modal -->
+    <div id="gradebookModal" class="modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="gradebookModalTitle">Add Gradebook Entry</h3>
+                <button class="modal-close" onclick="closeModal('gradebookModal')">✕</button>
+            </div>
+            <form id="gradebookForm" class="modal-form">
+                <input type="hidden" id="gradebookId">
+                <div class="form-group">
+                    <label>Student</label>
+                    <select id="gradebookStudent" class="form-input" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Session</label>
+                    <select id="gradebookSession" class="form-input" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Score</label>
+                    <input type="number" id="gradebookScore" class="form-input" value="0">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="gradebookAttended"> Attended
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="gradebookLate"> Late
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="gradebookLostConnection"> Lost Connection
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="gradebookHomeworkDone"> Homework Done
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Improvement Note</label>
+                    <input type="text" id="gradebookNote" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Feedback</label>
+                    <textarea id="gradebookFeedback" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" onclick="closeModal('gradebookModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="crud.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>

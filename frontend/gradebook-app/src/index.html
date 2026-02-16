@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Teacher Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="/styles.css"> 
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <div class="brand-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+            <h2>Welcome Back</h2>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Enter your admin passkey</p>
+            <input type="password" id="password-input" placeholder="Passkey">
+            <button id="login-btn">Unlock Dashboard</button>
+            <p id="login-error" class="hidden" style="color: var(--danger-color); margin-top:10px;">Incorrect Passkey</p>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden">
+        
+        <nav class="glass-sidebar">
+            <div class="brand">
+                <h3><i class="fa-solid fa-layer-group"></i> Portal Pro</h3>
+            </div>
+            <ul class="nav-links desktop-nav">
+                <li onclick="showSection('dashboard')" class="active" id="d-dash">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </li>
+                <li onclick="showSection('sessions')" id="d-sess">
+                    <i class="fa-solid fa-calendar-check"></i> Sessions
+                </li>
+                <li onclick="showSection('students')" id="d-stud">
+                    <i class="fa-solid fa-users"></i> Students
+                </li>
+                <li onclick="showSection('gradebook')" id="d-grade">
+                    <i class="fa-solid fa-pen-to-square"></i> Gradebook
+                </li>
+                <li onclick="showSection('homework')" id="d-hw">
+                    <i class="fa-solid fa-book"></i> Materials
+                </li>
+            </ul>
+            <button id="logout-btn"><i class="fa-solid fa-power-off"></i> Logout</button>
+        </nav>
+
+        <main id="main-content">
+            <header class="mobile-header">
+                <h3 id="page-title">Dashboard</h3>
+                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+            </header>
+            <div id="content-area">
+                </div>
+            <div style="height: 80px;"></div> </main>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="showSection('dashboard')" id="m-dash">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="showSection('sessions')" id="m-sess">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span>Sess.</span>
+            </div>
+            <div class="nav-item" onclick="showSection('gradebook')" id="m-grade">
+                <i class="fa-solid fa-check-double"></i>
+                <span>Grades</span>
+            </div>
+            <div class="nav-item" onclick="showSection('students')" id="m-stud">
+                <i class="fa-solid fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" onclick="showSection('homework')" id="m-hw">
+                <i class="fa-solid fa-book"></i>
+                <span>Mat.</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>

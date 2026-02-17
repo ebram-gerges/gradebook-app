@@ -32,6 +32,9 @@
                 <li onclick="showSection('dashboard')" class="active" id="d-dash">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </li>
+                <li onclick="showSection('live-session')" id="d-live">
+                    <i class="fa-solid fa-circle-dot"></i> Live Session
+                </li>
                 <li onclick="showSection('sessions')" id="d-sess">
                     <i class="fa-solid fa-calendar-check"></i> Sessions
                 </li>
@@ -62,6 +65,10 @@
                 <i class="fa-solid fa-house"></i>
                 <span>Home</span>
             </div>
+            <div class="nav-item" onclick="showSection('live-session')" id="m-live">
+                <i class="fa-solid fa-circle-dot"></i>
+                <span>Live</span>
+            </div>
             <div class="nav-item" onclick="showSection('sessions')" id="m-sess">
                 <i class="fa-solid fa-calendar-check"></i>
                 <span>Sess.</span>
@@ -73,10 +80,6 @@
             <div class="nav-item" onclick="showSection('students')" id="m-stud">
                 <i class="fa-solid fa-users"></i>
                 <span>Users</span>
-            </div>
-            <div class="nav-item" onclick="showSection('homework')" id="m-hw">
-                <i class="fa-solid fa-book"></i>
-                <span>Mat.</span>
             </div>
         </div>
 

@@ -69,6 +69,7 @@ function setupNavigation() {
 function updateUIState(sectionId) {
 	const titles = {
 		dashboard: "Dashboard",
+		"live-session": "Live Session",
 		sessions: "Sessions",
 		students: "Students",
 		gradebook: "Gradebook",
@@ -99,6 +100,7 @@ async function loadSection(section) {
 
 	try {
 		if (section === "dashboard") renderDashboard();
+		else if (section === "live-session") renderLiveSession();
 		else if (section === "sessions") await renderSessions();
 		else if (section === "students") await renderStudents();
 		else if (section === "gradebook") await renderGradebook();
@@ -456,3 +458,173 @@ function renderDashboard() {
         </div>
     `;
 }
+
+// --- LIVE SESSION MODULE ---
+let liveSessionTimer = null;
+let liveSessionTime = 0;
+let liveSessionStudents = [];
+
+function renderLiveSession() {
+	const contentArea = document.getElementById("content-area");
+	contentArea.innerHTML = `
+		<div class="live-session-container">
+			<!-- Top Bar -->
+			<div class="live-session-header">
+				<div style="display:flex; align-items:center; gap:15px;">
+					<div>
+						<h3 style="margin:0;">Grade 5 - Math</h3>
+						<p style="color:var(--text-muted); font-size:0.85rem; margin:0;">Live Session</p>
+					</div>
+				</div>
+				<div style="display:flex; align-items:center; gap:15px;">
+					<!-- Timer -->
+					<div style="display:flex; align-items:center; gap:10px;">
+						<div class="session-timer" id="session-timer">00:00</div>
+						<button onclick="toggleSessionTimer()" id="timer-btn" style="background:var(--surface-variant); padding:8px 16px;">
+							<i class="fa-solid fa-pause"></i> Pause
+						</button>
+					</div>
+					<!-- End Session Button -->
+					<button onclick="endLiveSession()" style="background:var(--danger); padding:10px 20px;">
+						<i class="fa-solid fa-stop"></i> End Session
+					</button>
+				</div>
+			</div>
+
+			<!-- Students Grid -->
+			<div class="students-grid" id="students-grid">
+				<!-- Student cards will be dynamically added -->
+			</div>
+
+			<!-- Floating Add Button -->
+			<button class="fab-button" onclick="addLiveStudent()">
+				<i class="fa-solid fa-plus"></i>
+			</button>
+		</div>
+	`;
+
+	// Initialize with sample students
+	liveSessionStudents = [
+		{ id: 1, name: "Ahmed Hassan", score: 0 },
+		{ id: 2, name: "Fatima Ali", score: 0 },
+		{ id: 3, name: "Mohamed Karim", score: 0 },
+		{ id: 4, name: "Leila Samir", score: 0 },
+	];
+
+	renderStudentCards();
+	startSessionTimer();
+}
+
+function renderStudentCards() {
+	const grid = document.getElementById("students-grid");
+	grid.innerHTML = liveSessionStudents
+		.map(
+			(student) => `
+		<div class="student-score-card" data-id="${student.id}">
+			<h4 style="text-align:center; margin:0 0 15px 0; font-size:0.9rem; color:var(--text-main);">
+				${student.name}
+			</h4>
+			
+			<!-- Score Display -->
+			<div style="background:var(--surface-variant); border-radius:12px; padding:20px; text-align:center; margin-bottom:15px;">
+				<p style="font-size:0.75rem; color:var(--text-muted); margin:0 0 5px 0;">Score</p>
+				<p style="font-size:2.5rem; font-weight:700; color:var(--primary); margin:0;">${student.score}</p>
+			</div>
+
+			<!-- Positive Buttons -->
+			<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:8px;">
+				<button onclick="updateScore(${student.id}, 1)" class="score-btn score-positive">+1</button>
+				<button onclick="updateScore(${student.id}, 3)" class="score-btn score-positive">+3</button>
+				<button onclick="updateScore(${student.id}, 5)" class="score-btn score-positive">+5</button>
+			</div>
+
+			<!-- Negative Buttons -->
+			<div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:10px;">
+				<button onclick="updateScore(${student.id}, -1)" class="score-btn score-negative">-1</button>
+				<button onclick="updateScore(${student.id}, -3)" class="score-btn score-negative">-3</button>
+				<button onclick="updateScore(${student.id}, -5)" class="score-btn score-negative">-5</button>
+			</div>
+
+			<!-- Custom Input -->
+			<div style="display:flex; gap:5px;">
+				<input type="number" id="custom-${student.id}" placeholder="+2 or -10" 
+					style="flex:1; background:var(--surface-variant); border:1px solid var(--glass-border); 
+					border-radius:8px; padding:8px; color:var(--text-main); font-size:0.85rem;">
+				<button onclick="applyCustomScore(${student.id})" class="score-btn" 
+					style="background:var(--primary); padding:8px 12px; font-size:0.85rem;">Apply</button>
+			</div>
+		</div>
+	`,
+		)
+		.join("");
+}
+
+// Session Timer Functions
+function startSessionTimer() {
+	liveSessionTimer = setInterval(() => {
+		liveSessionTime++;
+		updateTimerDisplay();
+	}, 1000);
+}
+
+function updateTimerDisplay() {
+	const mins = Math.floor(liveSessionTime / 60);
+	const secs = liveSessionTime % 60;
+	const timerEl = document.getElementById("session-timer");
+	if (timerEl) {
+		timerEl.textContent = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+	}
+}
+
+window.toggleSessionTimer = () => {
+	const btn = document.getElementById("timer-btn");
+	if (liveSessionTimer) {
+		clearInterval(liveSessionTimer);
+		liveSessionTimer = null;
+		btn.innerHTML = '<i class="fa-solid fa-play"></i> Resume';
+	} else {
+		startSessionTimer();
+		btn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+	}
+};
+
+window.endLiveSession = () => {
+	if (confirm("End this session? Unsaved progress will be lost.")) {
+		if (liveSessionTimer) clearInterval(liveSessionTimer);
+		liveSessionTime = 0;
+		liveSessionStudents = [];
+		showToast("Session ended", "success");
+		showSection("dashboard");
+	}
+};
+
+// Score Management
+window.updateScore = (studentId, delta) => {
+	const student = liveSessionStudents.find((s) => s.id === studentId);
+	if (student) {
+		student.score = Math.max(0, student.score + delta);
+		renderStudentCards();
+		console.log(
+			`📊 Score Update: Student ID ${studentId}, Delta: ${delta > 0 ? "+" : ""}${delta}`,
+		);
+	}
+};
+
+window.applyCustomScore = (studentId) => {
+	const input = document.getElementById(`custom-${studentId}`);
+	const value = parseInt(input.value, 10);
+	if (!isNaN(value) && value !== 0) {
+		updateScore(studentId, value);
+		input.value = "";
+	}
+};
+
+window.addLiveStudent = () => {
+	const name = prompt("Enter student name:");
+	if (name && name.trim()) {
+		const newId = Math.max(...liveSessionStudents.map((s) => s.id), 0) + 1;
+		liveSessionStudents.push({ id: newId, name: name.trim(), score: 0 });
+		renderStudentCards();
+		showToast(`Added ${name}`, "success");
+	}
+};

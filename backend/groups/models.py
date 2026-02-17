@@ -59,8 +59,10 @@ class Session(models.Model):
         ("done", "Done"),
         ("scheduled", "Scheduled"),
         ("canceled", "Canceled"),
+        ("active", "Active"),
     )
     group = models.ForeignKey(Groups, on_delete=models.CASCADE, related_name="sessions")
+    students = models.ManyToManyField(Student, through="StudentSessionScore")
     session_number = models.IntegerField()
     session_date = models.DateField()
     session_time = models.TimeField()
@@ -125,3 +127,20 @@ class GradeBook(models.Model):
 
     def __str__(self):
         return f"{self.student.full_name} - {self.session.title}: {self.score}"
+
+
+# ==============================================================================
+#                             6. studentSessionScore
+# ==============================================================================
+class StudentSessionScore(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE, related_name="student_score"
+    )
+    session = models.ForeignKey(
+        Session, on_delete=models.CASCADE, related_name="session_score"
+    )
+    score = models.IntegerField(default=0)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "session")
